@@ -1,14 +1,9 @@
-"""Agent B — Root Cause Analyzer: SDK orchestration.
+"""Agent D — Hallucination Detector: SDK orchestration.
 
-Mirrors `agents.reproducibility.agent` but for a read-only source
-review. Key differences:
-
-- Tools: `Read`, `Grep` only. No Bash, no network.
-- Budget: $3 (vs. $8 for A) — code navigation, not execution.
-- `_stage_inputs` ensures a shallow clone of the target repo at the
-  claimed tag exists under `vendor/{vendor}-{tag}/`, then symlinks
-  `findings_dir/source` at it (per agent-b-root-cause.md §inputs:
-  "A local clone ... already on disk under {findings_dir}/source/").
+Mirrors `agents.root_cause.agent` (same read-only source tree access)
+plus `WebFetch` so references to CVE IDs can be checked against NVD.
+The vendor clone is shared with Agent B — both call the same
+idempotent `_ensure_source_clone` helper.
 """
 
 from __future__ import annotations
@@ -30,21 +25,22 @@ from claude_agent_sdk import (
     query,
 )
 
-from agents.root_cause.prompt import load_system_prompt
-from agents.root_cause.tools import make_emit_verdict, make_think
+from agents.hallucination.prompt import load_system_prompt
+from agents.hallucination.tools import make_emit_verdict, make_think
 from orchestrator.findings import make_report_id, prepare_findings_dir
-from orchestrator.schemas import InputMeta, RootCauseArtifact
+from orchestrator.schemas import HallucinationArtifact, InputMeta
 
 EffortLiteral = Literal["low", "medium", "high", "max"]
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 VENDOR_ROOT = REPO_ROOT / "vendor"
 
-MCP_SERVER_NAME = "agent_b"
+MCP_SERVER_NAME = "agent_d"
 
 ALLOWED_TOOLS: list[str] = [
     "Read",
     "Grep",
+    "WebFetch",
     f"mcp__{MCP_SERVER_NAME}__think",
     f"mcp__{MCP_SERVER_NAME}__emit_verdict",
 ]
@@ -58,10 +54,10 @@ CLONE_TIMEOUT_SEC = 240
 
 
 @dataclass
-class AgentBRunResult:
+class AgentDRunResult:
     report_id: str
     findings_dir: Path
-    artifact: RootCauseArtifact | None
+    artifact: HallucinationArtifact | None
     scratchpad: list[str] = field(default_factory=list)
     total_cost_usd: float = 0.0
     total_turns: int = 0
@@ -72,25 +68,14 @@ class AgentBRunResult:
 def _ensure_source_clone(repo: str, tag: str, product: str) -> Path:
     """Shallow-clone `repo` at `tag` into `vendor/{product}-{tag}/` if missing.
 
-    Idempotent — if the directory exists and is non-empty, the clone is
-    skipped. The vendor tree is shared across samples that target the
-    same tag.
+    Shared convention with `agents.root_cause.agent._ensure_source_clone`.
     """
     VENDOR_ROOT.mkdir(parents=True, exist_ok=True)
     dest = VENDOR_ROOT / f"{product}-{tag}"
     if dest.exists() and any(dest.iterdir()):
         return dest
     subprocess.run(
-        [
-            "git",
-            "clone",
-            "--depth",
-            "1",
-            "--branch",
-            tag,
-            repo,
-            str(dest),
-        ],
+        ["git", "clone", "--depth", "1", "--branch", tag, repo, str(dest)],
         check=True,
         timeout=CLONE_TIMEOUT_SEC,
     )
@@ -100,7 +85,6 @@ def _ensure_source_clone(repo: str, tag: str, product: str) -> Path:
 def _stage_inputs(
     sample_dir: Path, findings_dir: Path, *, skip_source_clone: bool = False
 ) -> InputMeta:
-    """Copy INPUT files and (unless skipped) materialize `findings_dir/source`."""
     input_md = sample_dir / "INPUT.md"
     input_meta = sample_dir / "INPUT_meta.json"
     if not input_md.exists() or not input_meta.exists():
@@ -110,7 +94,6 @@ def _stage_inputs(
 
     shutil.copy2(input_md, findings_dir / "INPUT.md")
     shutil.copy2(input_meta, findings_dir / "INPUT_meta.json")
-
     meta = InputMeta.model_validate_json((findings_dir / "INPUT_meta.json").read_text())
 
     if skip_source_clone:
@@ -118,7 +101,7 @@ def _stage_inputs(
     if meta.target.claimed_tag is None:
         raise ValueError(
             f"sample {meta.sample_id} has no target.claimed_tag; "
-            "cannot stage source clone for Agent B"
+            "cannot stage source clone for Agent D"
         )
 
     vendor_dir = _ensure_source_clone(
@@ -133,7 +116,8 @@ def _stage_inputs(
 
 def _build_user_prompt(meta: InputMeta) -> str:
     return (
-        "Verify the report's root-cause claims against the source tree.\n\n"
+        "Extract every concrete technical reference in the report and verify "
+        "each one.\n\n"
         "Files available:\n"
         "- `INPUT.md` — the report body as submitted (verbatim)\n"
         "- `INPUT_meta.json` — structured metadata about the target\n"
@@ -145,9 +129,9 @@ def _build_user_prompt(meta: InputMeta) -> str:
         f"- claimed_tag: {meta.target.claimed_tag}\n"
         f"- claimed_cve: {meta.target.claimed_cve}\n"
         f"- bug_class: {meta.bug_class}\n\n"
-        "Follow the procedure in your system prompt. Read/Grep only — no "
-        "Bash, no network. Call `think` before the verdict. Call "
-        "`emit_verdict` exactly once to finish."
+        "Follow the procedure in your system prompt. Use Read/Grep for code "
+        "references; WebFetch (NVD only) for CVE existence. Call `think` "
+        "before the verdict. Call `emit_verdict` exactly once to finish."
     )
 
 
@@ -187,7 +171,7 @@ def _build_options(
     )
 
 
-async def run_agent_b(
+async def run_agent_d(
     *,
     sample_dir: Path,
     findings_root: Path = REPO_ROOT / "findings",
@@ -198,12 +182,8 @@ async def run_agent_b(
     effort: str = DEFAULT_EFFORT,
     dry_run: bool = False,
     skip_source_clone: bool = False,
-) -> AgentBRunResult:
-    """Run Agent B end-to-end against a recorded sample.
-
-    If `skip_source_clone` is True, staging skips the git clone and
-    symlink. Used by tests; not recommended for real runs.
-    """
+) -> AgentDRunResult:
+    """Run Agent D end-to-end against a recorded sample."""
     sample_dir = sample_dir.resolve()
     if not sample_dir.is_dir():
         raise FileNotFoundError(f"sample_dir not found: {sample_dir}")
@@ -239,7 +219,7 @@ async def run_agent_b(
 
     if dry_run:
         _persist_scratchpad(findings_dir, scratchpad)
-        return AgentBRunResult(
+        return AgentDRunResult(
             report_id=report_id,
             findings_dir=findings_dir,
             artifact=None,
@@ -271,7 +251,7 @@ async def run_agent_b(
     _persist_scratchpad(findings_dir, scratchpad)
 
     artifact = _load_and_validate_artifact(findings_dir, report_id)
-    return AgentBRunResult(
+    return AgentDRunResult(
         report_id=report_id,
         findings_dir=findings_dir,
         artifact=artifact,
@@ -285,18 +265,18 @@ async def run_agent_b(
 def _persist_scratchpad(findings_dir: Path, scratchpad: list[str]) -> None:
     if not scratchpad:
         return
-    (findings_dir / "B_think.txt").write_text(
+    (findings_dir / "D_think.txt").write_text(
         "\n\n---\n\n".join(scratchpad), encoding="utf-8"
     )
 
 
 def _load_and_validate_artifact(
     findings_dir: Path, report_id: str
-) -> RootCauseArtifact | None:
-    path = findings_dir / "B_root_cause.json"
+) -> HallucinationArtifact | None:
+    path = findings_dir / "D_hallucination.json"
     if not path.exists():
         return None
     try:
-        return RootCauseArtifact.model_validate_json(path.read_text())
+        return HallucinationArtifact.model_validate_json(path.read_text())
     except Exception:
         return None

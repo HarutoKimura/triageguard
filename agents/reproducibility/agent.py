@@ -186,12 +186,15 @@ async def run_agent_a(
     if not sample_dir.is_dir():
         raise FileNotFoundError(f"sample_dir not found: {sample_dir}")
 
+    caller_supplied_id = report_id is not None
     if report_id is None:
         meta_text = (sample_dir / "INPUT_meta.json").read_text()
         meta_preview = json.loads(meta_text)
         report_id = make_report_id(meta_preview.get("sample_id", "unnamed"))
 
-    findings_dir = prepare_findings_dir(findings_root, report_id)
+    findings_dir = prepare_findings_dir(
+        findings_root, report_id, exist_ok=caller_supplied_id
+    )
     meta = _stage_inputs(sample_dir, findings_dir)
     user_prompt = _build_user_prompt(meta)
 
