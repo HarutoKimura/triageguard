@@ -46,10 +46,14 @@ RUN git fetch --depth=1 origin tag ${WOLFSSL_TAG} \
  && git checkout ${WOLFSSL_TAG} \
  && ./autogen.sh
 
-# ASan + debug build. -fno-omit-frame-pointer keeps stack traces legible.
-RUN CC=clang \
-    CFLAGS="-O0 -g -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined" \
-    LDFLAGS="-fsanitize=address -fsanitize=undefined" \
+# ASan + debug build. Use gcc (not clang) because Ubuntu 24.04's
+# --no-install-recommends clang skips libclang-rt-*-dev, breaking the
+# configure link test. gcc + libasan8 (pulled by build-essential) works.
+# -O1 (not -O0) matches the submitter's reproduce.sh and avoids known
+# O0+ASan codegen issues. Static linking avoids ASAN shared-lib ordering.
+RUN CC=gcc \
+    CFLAGS="-O1 -g -fno-omit-frame-pointer -fsanitize=address" \
+    LDFLAGS="-fsanitize=address" \
     ./configure ${CONFIGURE_FLAGS}
 RUN make -j"$(nproc)"
 
