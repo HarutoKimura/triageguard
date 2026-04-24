@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip:*)",
+      "Bash(pip3:*)",
+      "Bash(uv:*)",
+      "Bash(pytest:*)",
+      "Bash(docker:build:*)",
+      "Bash(docker:run:*)",
+      "Bash(docker:ps:*)",
+      "Bash(docker:logs:*)",
+      "Bash(docker:stop:*)",
+      "Bash(docker:rm:*)",
+      "Bash(git:status)",
+      "Bash(git:diff:*)",
+      "Bash(git:log:*)",
+      "Bash(git:add:*)",
+      "Bash(git:commit:*)",
+      "Bash(git:branch:*)",
+      "Bash(git:checkout:*)",
+      "Bash(git:stash:*)",
+      "Bash(gh:pr:view:*)",
+      "Bash(gh:issue:view:*)",
+      "Bash(gh:run:view:*)",
+      "Bash(npm:install)",
+      "Bash(npm:run:*)",
+      "Bash(pnpm:install)",
+      "Bash(pnpm:run:*)",
+      "Bash(npx:*)",
+      "Bash(ls:*)",
+      "Bash(jq:*)",
+      "Bash(curl:-s*)",
+      "Bash(curl:-sS*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(make:*)",
+      "Bash(cmake:*)",
+      "Bash(autoreconf:*)",
+      "Bash(./configure:*)",
+      "WebFetch(domain:anthropic.com)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:nvd.nist.gov)",
+      "WebFetch(domain:cve.mitre.org)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:hackerone.com)",
+      "WebFetch(domain:wolfssl.com)",
+      "WebFetch(domain:curl.se)"
+    ],
+    "deny": [
+      "Bash(git:push:--force*)",
+      "Bash(git:push:-f*)",
+      "Bash(git:reset:--hard*)",
+      "Bash(rm:-rf:/*)",
+      "Bash(sudo:*)",
+      "Read(//**/.env)",
+      "Read(//**/.env.*)",
+      "Read(//**/id_rsa)",
+      "Read(//**/id_ed25519)",
+      "Read(//**/*.pem)",
+      "Read(//**/*.key)",
+      "Read(//**/secrets.*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/guard-destructive-git.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash .claude/hooks/statusline.sh"
+  },
+  "env": {
+    "TRIAGEGUARD_DEADLINE": "2026-04-26T20:00:00-04:00",
+    "TRIAGEGUARD_TIMEZONE": "America/New_York"
+  }
+}

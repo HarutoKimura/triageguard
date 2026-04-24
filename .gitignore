@@ -1,0 +1,56 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+id_rsa*
+id_ed25519*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+dist/
+build/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.log
+
+# Remotion
+video/out/
+video/.remotion/
+
+# TriageGuard runtime artifacts
+findings/
+rehearsals/
+logs/
+.tmp/
+
+# macOS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Research corpus — Anthropic IP and other people's licensed work.
+# These folders are reference material, not part of the submission.
+# Critical: this repo flips public on submission day.
+anthoropic-engineering-blog/
+cc-crossbeam/
+claude-code-docs/
+everything-claude-code/
+live-session-built-with-opus-4.7/
+
+# Transcribed hackathon slide content — borderline IP, exclude from public repo.
+HACKATHON_RULES.md
+
+# uv
+.venv/

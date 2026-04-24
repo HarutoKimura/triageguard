@@ -1,0 +1,62 @@
+# TriageGuard sandbox image for reproducing wolfSSL CVEs.
+# Agent A runs untrusted PoCs inside disposable instances of this image.
+#
+# Build:
+#   docker build -f Dockerfile.wolfssl \
+#     --build-arg WOLFSSL_TAG=v5.6.4-stable \
+#     --build-arg CONFIGURE_FLAGS="--enable-all --enable-session-ticket" \
+#     -t triageguard/wolfssl:v5.6.4-stable .
+#
+# Run (per .claude/skills/wolfssl-domain/SKILL.md §7):
+#   docker run --rm --network=none \
+#     --cpus=2 --memory=2g --pids-limit=256 \
+#     --read-only --tmpfs /tmp --tmpfs /work/scratch \
+#     triageguard/wolfssl:v5.6.4-stable \
+#     timeout 600 /work/run_poc.sh
+
+FROM ubuntu:24.04
+
+ARG WOLFSSL_TAG=v5.7.6-stable
+ARG CONFIGURE_FLAGS="--enable-all --enable-debug"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential \
+      autoconf automake libtool pkg-config \
+      git ca-certificates \
+      clang llvm \
+      gdb valgrind \
+      libssl-dev \
+      python3 python3-pip \
+      coreutils \
+ && rm -rf /var/lib/apt/lists/*
+
+# Non-root user — PoCs run as this user inside the sandbox.
+RUN useradd -m -s /bin/bash triage
+WORKDIR /src
+RUN chown triage:triage /src
+
+USER triage
+
+RUN git clone --depth=1 --no-single-branch --filter=blob:none \
+      https://github.com/wolfSSL/wolfssl.git /src/wolfssl
+WORKDIR /src/wolfssl
+RUN git fetch --depth=1 origin tag ${WOLFSSL_TAG} \
+ && git checkout ${WOLFSSL_TAG} \
+ && ./autogen.sh
+
+# ASan + debug build. -fno-omit-frame-pointer keeps stack traces legible.
+RUN CC=clang \
+    CFLAGS="-O0 -g -fno-omit-frame-pointer -fsanitize=address -fsanitize=undefined" \
+    LDFLAGS="-fsanitize=address -fsanitize=undefined" \
+    ./configure ${CONFIGURE_FLAGS}
+RUN make -j"$(nproc)"
+
+# PoC drop zone — orchestrator bind-mounts the per-report directory here.
+USER root
+RUN mkdir -p /work/scratch && chown triage:triage /work
+USER triage
+
+WORKDIR /work
+ENTRYPOINT ["/bin/bash"]
