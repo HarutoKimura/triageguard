@@ -39,11 +39,16 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
             <div className="font-mono text-lg">{signal.recommendation}</div>
           </div>
         </div>
-        <div className="text-right">
-          <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
-            triggering rule
+        <div className="flex items-start gap-6">
+          {signal.ensemble_confidence != null && (
+            <ConfidenceMeter value={signal.ensemble_confidence} />
+          )}
+          <div className="text-right">
+            <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
+              triggering rule
+            </div>
+            <div className="font-mono text-lg">{signal.triggering_rule}</div>
           </div>
-          <div className="font-mono text-lg">{signal.triggering_rule}</div>
         </div>
       </div>
 
@@ -59,6 +64,41 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
           </div>
         ))}
       </dl>
+    </div>
+  );
+}
+
+function ConfidenceMeter({ value }: { value: number }) {
+  const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
+  const barColor =
+    pct >= 85
+      ? "var(--color-signal)"
+      : pct >= 60
+        ? "var(--color-uncertain)"
+        : "var(--color-slop)";
+  return (
+    <div className="min-w-28">
+      <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)] text-right">
+        confidence
+      </div>
+      <div className="mt-0.5 flex items-baseline justify-end gap-1">
+        <span className="font-mono text-lg">{pct}%</span>
+      </div>
+      <div
+        className="mt-1 h-1.5 w-28 rounded-full bg-[var(--color-panel-2)] overflow-hidden"
+        role="meter"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+      >
+        <div
+          className="h-full transition-[width] duration-500"
+          style={{ width: `${pct}%`, background: barColor }}
+        />
+      </div>
+      <div className="mt-1 text-right text-[10px] text-[var(--color-ink-faint)] font-mono">
+        geo-mean ×4
+      </div>
     </div>
   );
 }

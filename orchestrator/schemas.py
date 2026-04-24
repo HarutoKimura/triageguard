@@ -183,6 +183,10 @@ class SignalScore(BaseModel):
     triggering_rule: int = Field(ge=0, le=99)
     sub_agent_verdicts: dict[str, Any] = Field(default_factory=dict)
     generated_at: datetime | None = None
+    # Geometric mean of the four sub-agent confidences (Agent D derived
+    # from its claim-checking coverage). Nullable for backward compat
+    # with pre-Day-2 SIGNAL_SCORE.json files that predate this field.
+    ensemble_confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     # Opus 4.7 narrative produced after the deterministic rule fires.
     # Optional: runs that happened before the reasoning module existed,
     # or runs where the Opus call failed, will have this as None.

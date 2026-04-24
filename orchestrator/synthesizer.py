@@ -14,6 +14,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any
 
+from orchestrator.confidence import compute_ensemble_confidence
 from orchestrator.schemas import (
     DuplicateArtifact,
     HallucinationArtifact,
@@ -48,6 +49,9 @@ def synthesize(
             "hallucination_invalid_count": invalid_count,
         },
         "generated_at": datetime.now(UTC),
+        "ensemble_confidence": round(
+            compute_ensemble_confidence(a=a, b=b, c=c, d=d), 4
+        ),
     }
 
     # Rule 1 — Killer: explicit slop.

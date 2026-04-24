@@ -21,6 +21,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from orchestrator.confidence import compute_ensemble_confidence
 from orchestrator.reasoning import generate_narrative
 from orchestrator.schemas import (
     DuplicateArtifact,
@@ -53,6 +54,14 @@ async def regenerate(findings_dir: Path) -> None:
     signal_raw = json.loads(
         (findings_dir / "SIGNAL_SCORE.json").read_text(encoding="utf-8")
     )
+    # Backfill ensemble_confidence if the run predates it.
+    if signal_raw.get("ensemble_confidence") is None:
+        signal_raw["ensemble_confidence"] = round(
+            compute_ensemble_confidence(
+                a=repro, b=root_cause, c=duplicate, d=hallucination
+            ),
+            4,
+        )
     signal = SignalScore.model_validate(signal_raw)
     input_md = (findings_dir / "INPUT.md").read_text(encoding="utf-8")
 
