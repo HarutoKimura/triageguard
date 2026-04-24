@@ -183,6 +183,10 @@ class SignalScore(BaseModel):
     triggering_rule: int = Field(ge=0, le=99)
     sub_agent_verdicts: dict[str, Any] = Field(default_factory=dict)
     generated_at: datetime | None = None
+    # Opus 4.7 narrative produced after the deterministic rule fires.
+    # Optional: runs that happened before the reasoning module existed,
+    # or runs where the Opus call failed, will have this as None.
+    narrative: str | None = None
 
 
 # ---------------------------------------------------------------------------

@@ -132,6 +132,7 @@ export interface SignalScoreArtifact {
   generated_at?: string | null;
   total_runtime_sec?: number | null;
   total_cost_usd?: number | null;
+  narrative?: string | null;
 }
 
 export interface RunBundle {

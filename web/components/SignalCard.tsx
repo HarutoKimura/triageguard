@@ -49,6 +49,8 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
 
       <p className="mt-4 text-[var(--color-ink)]">{signal.reason}</p>
 
+      {signal.narrative && <Narrative text={signal.narrative} />}
+
       <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-dim)] sm:grid-cols-4">
         {Object.entries(verdicts).map(([k, v]) => (
           <div key={k}>
@@ -58,5 +60,27 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
         ))}
       </dl>
     </div>
+  );
+}
+
+function Narrative({ text }: { text: string }) {
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return (
+    <section className="mt-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel-2)] p-4">
+      <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-[var(--color-ink-faint)]">
+        <span>Opus 4.7 reasoning</span>
+        <span className="font-mono text-[var(--color-ink-dim)] normal-case tracking-normal">
+          xhigh · adaptive thinking
+        </span>
+      </div>
+      <div className="space-y-3 text-[13px] leading-relaxed text-[var(--color-ink)]">
+        {paragraphs.map((p, i) => (
+          <p key={i}>{p}</p>
+        ))}
+      </div>
+    </section>
   );
 }
