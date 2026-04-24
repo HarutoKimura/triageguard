@@ -54,3 +54,8 @@ HACKATHON_RULES.md
 
 # uv
 .venv/
+
+# Claude Code personal overrides — never commit. The shared .claude/
+# tree is tracked; only local-only files are excluded.
+.claude/settings.local.json
+.claude/*.local.json
