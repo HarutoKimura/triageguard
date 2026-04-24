@@ -163,8 +163,8 @@ Recommendation: REJECT. Likely AI-generated without codebase verification.
 
 | # | Input | Expected label | Expected score | Triggering rule |
 |---|-------|----------------|----------------|-----------------|
-| 1 | CVE-2026-2646 | SIGNAL | 85–90 | Rule 5 |
-| 2 | CVE-2026-3849 | SIGNAL | 80–90 | Rule 5 or 6 |
+| 1 | CVE-2026-3849 | SIGNAL | 85–90 | Rule 5 |
+| 2 | CVE-2026-2646 | SIGNAL | 80–90 | Rule 5 or 8 (depends on PoC) |
 | 3 | CVE-2026-5194 | SIGNAL | 85–95 | Rule 5 |
 | 4 | curl slop #1 | SLOP | 10–25 | Rule 1 or 4 |
 | 5 | curl slop #2 | SLOP | 10–25 | Rule 1 or 4 |
