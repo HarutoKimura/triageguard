@@ -54,15 +54,26 @@ def slugify(text: str) -> str:
 
 
 def make_report_id(title: str) -> str:
-    """Build `YYYY-MM-DDTHH-MM-SS_<slug>`; guaranteed filesystem-safe."""
-    ts = datetime.now(UTC).strftime("%Y-%m-%dT%H-%M-%S")
+    """Build `YYYY-MM-DDTHH-MM-SS-mmm_<slug>`; guaranteed filesystem-safe.
+
+    Millisecond precision avoids collisions when two runs land in the same
+    wall-clock second (typical during rehearsals and back-to-back demos).
+    """
+    now = datetime.now(UTC)
+    ms = now.microsecond // 1000
+    ts = now.strftime("%Y-%m-%dT%H-%M-%S") + f"-{ms:03d}"
     return f"{ts}_{slugify(title)}"
 
 
-def prepare_findings_dir(root: Path, report_id: str) -> Path:
-    """Create `{root}/{report_id}/` and return it."""
+def prepare_findings_dir(root: Path, report_id: str, *, exist_ok: bool = False) -> Path:
+    """Create `{root}/{report_id}/` and return it.
+
+    `exist_ok` defaults to False so the single-agent CLI path still errors
+    on accidental rerun with a collision-prone id. The orchestrator passes
+    `exist_ok=True` so the two parallel sub-agents can share one directory.
+    """
     path = root / report_id
-    path.mkdir(parents=True, exist_ok=False)
+    path.mkdir(parents=True, exist_ok=exist_ok)
     return path
 
 

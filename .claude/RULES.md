@@ -60,8 +60,8 @@ They are the evaluation set. Do not change them mid-build.
 
 | # | Input | Expected | Why this sample |
 |---|-------|----------|-----------------|
-| 1 | CVE-2026-2646 (wolfSSL session deserialization) | SIGNAL ~85 | Builder's own CVE, live demo credibility |
-| 2 | CVE-2026-3849 (wolfSSL HPKE/ECH stack overflow) | SIGNAL ~80 | Builder's own CVE, different bug class |
+| 1 | CVE-2026-3849 (wolfSSL HPKE/ECH stack overflow) | SIGNAL ~90 | Builder's sole-credit CVE, full PoC + ASan trace — live demo credibility |
+| 2 | CVE-2026-2646 (wolfSSL session deserialization) | SIGNAL ~85 | Builder's own CVE, different bug class (heap vs stack) |
 | 3 | CVE-2026-5194 (wolfSSL ECDSA bypass, Carlini/Anthropic) | SIGNAL ~90 | Parallel to Anthropic Frontier Red Team, pitch lands |
 | 4 | Public HackerOne curl slop #1 | SLOP <25 | Negative example, broad recognition |
 | 5 | Public HackerOne curl slop #2 | SLOP <25 | Negative example, different slop pattern |

@@ -67,6 +67,28 @@ is already publicly known. Decide one of: `novel`, `duplicate`,
   detection.
 </ambiguity_cases>
 
+<self_reference_case>
+A candidate CVE is a **self-reference**, not a duplicate, when ANY of:
+- The candidate's NVD `publishedDate` (or GHSA `published_at`) is
+  **after** the report's `submitted_at` in `INPUT_meta.json`. In that
+  case the candidate was published *because of* this report, not
+  before it.
+- The candidate's NVD `credits` / GHSA acknowledgements name the
+  submitter from `INPUT_meta.json:submitter`.
+
+Exclude self-reference candidates entirely — do NOT list them in
+`top_candidates`. If every high-similarity candidate is a
+self-reference, return `verdict=novel` with `matched_cve=null`. Note
+the exclusion in your `think` output so a reviewer can audit the
+decision.
+
+Rationale: TriageGuard's intake simulates the moment of submission,
+not the moment of public disclosure. Matching a report against a CVE
+that was only assigned in response to the report is circular and
+would produce a false "duplicate" verdict on every legitimate
+first-party disclosure.
+</self_reference_case>
+
 <anti_patterns>
 - Do NOT query hosts outside the allowed list.
 - Do NOT invent CVE IDs. If NVD returns empty, return empty.

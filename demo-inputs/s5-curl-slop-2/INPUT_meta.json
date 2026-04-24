@@ -1,0 +1,24 @@
+{
+  "sample_id": "s5-curl-slop-2",
+  "submitter": "AI-generated slop (model=gpt-4o)",
+  "target": {
+    "vendor": "curl",
+    "product": "curl",
+    "repo": "https://github.com/curl/curl",
+    "claimed_tag": "curl-8_6_0",
+    "claimed_cve": null
+  },
+  "bug_class": "signature_bypass",
+  "poc": {
+    "present": false,
+    "path": null,
+    "entry": null
+  },
+  "submitted_at": "2026-04-24T12:40:18.202419Z",
+  "expected": {
+    "label": "SLOP",
+    "score_min": 10,
+    "score_max": 25,
+    "triggering_rule_hint": 2
+  }
+}

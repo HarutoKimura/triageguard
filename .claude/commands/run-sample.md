@@ -13,12 +13,10 @@ Run a single demo sample end-to-end.
    exist. If not, point at `/record-finding`.
 3. Execute:
    ```bash
-   python -m orchestrator.cli \
-     --input demo-inputs/$SAMPLE_ID \
-     --output findings/ \
-     --stream
+   .venv/bin/python -m orchestrator demo-inputs/$SAMPLE_ID
    ```
-   Stream stdout to the terminal. Do NOT swallow it.
+   Stream stdout to the terminal. Do NOT swallow it. Pass `--dry-run` to
+   validate plumbing without any Agent SDK calls.
 4. When the run finishes, read:
    - `findings/*/SIGNAL_SCORE.json` (the latest run's JSON)
    - `findings/*/SYNTHESIS.md` (the human verdict card)
