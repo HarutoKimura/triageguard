@@ -35,6 +35,10 @@ rehearsals/
 logs/
 .tmp/
 
+# Vendored upstream source trees cloned by Agents B/D (shared per tag).
+# Large, upstream, regenerable; never commit.
+vendor/
+
 # macOS / IDE
 .DS_Store
 .idea/
