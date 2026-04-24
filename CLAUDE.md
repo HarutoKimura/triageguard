@@ -46,6 +46,12 @@ duplicate.
 
 ## Rules (full list in [.claude/RULES.md](.claude/RULES.md))
 
+- **English-only for anything written to disk.** All source comments,
+  docstrings, commit messages, PR descriptions, log lines, and doc
+  files are in English — regardless of the language of the chat.
+  Conversational replies in chat may mirror the user's language, but
+  artifacts may not. Rationale: audience is English-speaking (hackathon
+  judges, maintainers receiving verdicts, GitHub visitors).
 - Type hints mandatory (Python), strict TS, no `any`.
 - Each product sub-agent: one directory under `agents/`.
 - Shared state via file-based handoff under `findings/{report_id}/`.
