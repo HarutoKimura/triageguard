@@ -27,6 +27,7 @@ from claude_agent_sdk import (
 from agents.duplicate.prompt import load_system_prompt
 from agents.duplicate.tools import make_emit_verdict, make_think
 from orchestrator.findings import make_report_id, prepare_findings_dir
+from orchestrator.nvd_client import make_nvd_fetch
 from orchestrator.schemas import DuplicateArtifact, InputMeta
 
 EffortLiteral = Literal["low", "medium", "high", "max"]
@@ -41,6 +42,7 @@ ALLOWED_TOOLS: list[str] = [
     "WebFetch",
     f"mcp__{MCP_SERVER_NAME}__think",
     f"mcp__{MCP_SERVER_NAME}__emit_verdict",
+    f"mcp__{MCP_SERVER_NAME}__nvd_fetch",
 ]
 
 DEFAULT_BUDGET_USD = 3.0
@@ -100,6 +102,7 @@ def _build_options(
     system_prompt: str,
     think_tool: Any,
     emit_verdict_tool: Any,
+    nvd_fetch_tool: Any,
     budget_usd: float,
     max_turns: int,
     model: str,
@@ -108,7 +111,7 @@ def _build_options(
     mcp_server = create_sdk_mcp_server(
         name=MCP_SERVER_NAME,
         version="0.1.0",
-        tools=[think_tool, emit_verdict_tool],
+        tools=[think_tool, emit_verdict_tool, nvd_fetch_tool],
     )
     return ClaudeAgentOptions(
         system_prompt={
@@ -159,9 +162,14 @@ async def run_agent_c(
 
     started_at = datetime.now(UTC)
     scratchpad: list[str] = []
+    nvd_cache_hits: list[str] = []
+    nvd_cache_misses: list[str] = []
     think_tool = make_think(scratchpad)
     emit_verdict_tool = make_emit_verdict(
         findings_dir=findings_dir, report_id=report_id, started_at=started_at
+    )
+    nvd_fetch_tool = make_nvd_fetch(
+        cache_hits=nvd_cache_hits, cache_misses=nvd_cache_misses
     )
 
     options = _build_options(
@@ -169,6 +177,7 @@ async def run_agent_c(
         system_prompt=load_system_prompt(),
         think_tool=think_tool,
         emit_verdict_tool=emit_verdict_tool,
+        nvd_fetch_tool=nvd_fetch_tool,
         budget_usd=budget_usd,
         max_turns=max_turns,
         model=model,
@@ -207,6 +216,7 @@ async def run_agent_c(
 
     duration_sec = time.monotonic() - t0
     _persist_scratchpad(findings_dir, scratchpad)
+    _persist_nvd_log(findings_dir, nvd_cache_hits, nvd_cache_misses)
 
     artifact = _load_and_validate_artifact(findings_dir, report_id)
     return AgentCRunResult(
@@ -226,6 +236,21 @@ def _persist_scratchpad(findings_dir: Path, scratchpad: list[str]) -> None:
     (findings_dir / "C_think.txt").write_text(
         "\n\n---\n\n".join(scratchpad), encoding="utf-8"
     )
+
+
+def _persist_nvd_log(
+    findings_dir: Path, hits: list[str], misses: list[str]
+) -> None:
+    if not (hits or misses):
+        return
+    lines = [f"nvd_cache_hits: {len(hits)}", f"nvd_cache_misses: {len(misses)}", ""]
+    if hits:
+        lines.append("HITS:")
+        lines.extend(f"  {u}" for u in hits)
+    if misses:
+        lines.append("MISSES:")
+        lines.extend(f"  {u}" for u in misses)
+    (findings_dir / "C_nvd_cache.log").write_text("\n".join(lines), encoding="utf-8")
 
 
 def _load_and_validate_artifact(

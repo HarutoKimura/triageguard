@@ -39,6 +39,7 @@ from orchestrator.findings import (
     make_report_id,
     prepare_findings_dir,
 )
+from orchestrator.reasoning import generate_narrative
 from orchestrator.schemas import (
     DuplicateArtifact,
     HallucinationArtifact,
@@ -140,9 +141,18 @@ async def run_triage(
 
     runtime_sec = time.monotonic() - t0
     total_cost_usd = _sum_cost(agent_results)
-    signal_score, missing = _try_synthesize(report_id, findings_dir)
+    signal_score, missing, parsed_artifacts = _try_synthesize(report_id, findings_dir)
 
     if signal_score is not None:
+        narrative_cost = await _attach_narrative(
+            signal_score=signal_score,
+            sample_dir=sample_dir,
+            meta=meta,
+            artifacts=parsed_artifacts,
+            findings_dir=findings_dir,
+            dry_run=dry_run,
+        )
+        total_cost_usd += narrative_cost
         _write_signal_score(findings_dir, signal_score, runtime_sec, total_cost_usd)
         _write_synthesis_md(findings_dir, signal_score, meta)
 
@@ -171,11 +181,11 @@ def _sum_cost(agent_results: dict[str, Any]) -> float:
 
 def _try_synthesize(
     report_id: str, findings_dir: Path
-) -> tuple[SignalScore | None, list[str]]:
+) -> tuple[SignalScore | None, list[str], dict[str, Any]]:
     """Load the four artifacts from disk; synthesize only if all present.
 
-    Returns `(SignalScore | None, missing_agent_keys)`. File-based handoff
-    per `.claude/skills/findings-journal/SKILL.md §1`.
+    Returns `(SignalScore | None, missing_agent_keys, parsed_artifacts)`.
+    File-based handoff per `.claude/skills/findings-journal/SKILL.md §1`.
     """
     missing: list[str] = []
     pairs: list[tuple[str, str, type[Any]]] = [
@@ -199,7 +209,7 @@ def _try_synthesize(
             missing.append(key)
 
     if missing:
-        return None, missing
+        return None, missing, parsed
 
     return (
         synthesize(
@@ -210,7 +220,54 @@ def _try_synthesize(
             d=parsed["hallucination"],
         ),
         [],
+        parsed,
     )
+
+
+async def _attach_narrative(
+    *,
+    signal_score: SignalScore,
+    sample_dir: Path,
+    meta: InputMeta,
+    artifacts: dict[str, Any],
+    findings_dir: Path,
+    dry_run: bool,
+) -> float:
+    """Ask Opus 4.7 for a maintainer-facing narrative. Best-effort.
+
+    Mutates `signal_score.narrative` in place on success. On any
+    failure, logs to `errors_narrative.log` and returns 0.0 cost so
+    the deterministic verdict still reaches the UI.
+    """
+    if dry_run:
+        return 0.0
+
+    input_md_path = sample_dir / "INPUT.md"
+    input_md = (
+        input_md_path.read_text(encoding="utf-8") if input_md_path.exists() else ""
+    )
+
+    try:
+        result = await generate_narrative(
+            input_md=input_md,
+            input_meta=meta,
+            repro=artifacts["reproducibility"],
+            root_cause=artifacts["root_cause"],
+            duplicate=artifacts["duplicate"],
+            hallucination=artifacts["hallucination"],
+            signal=signal_score,
+        )
+    except Exception as exc:
+        (findings_dir / "errors_narrative.log").write_text(
+            f"{type(exc).__name__}: {exc}\n", encoding="utf-8"
+        )
+        return 0.0
+
+    signal_score.narrative = result.narrative_md
+    (findings_dir / "NARRATIVE.md").write_text(
+        result.narrative_md + "\n", encoding="utf-8"
+    )
+    return result.cost_usd
 
 
 def _write_signal_score(
@@ -244,6 +301,15 @@ def _write_synthesis_md(
     ]
     for key, value in score.sub_agent_verdicts.items():
         lines.append(f"- **{key}**: `{value}`")
+    if score.narrative:
+        lines.extend(
+            [
+                "",
+                "## Narrative (Opus 4.7)",
+                "",
+                score.narrative,
+            ]
+        )
     lines.extend(
         [
             "",

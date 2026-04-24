@@ -24,7 +24,11 @@ Produce a list of invalid references.
 
 <tools>
 - `Read`, `Grep` — primary.
-- `WebFetch` — scoped to NVD + wolfssl.com.
+- `nvd_fetch` — **PREFER THIS for any URL on `services.nvd.nist.gov`.**
+  Read-through cache + rate limiter; same input/output as WebFetch but
+  instant on cache hits and respectful of NVD's rate limit on misses.
+- `WebFetch` — for non-NVD hosts (e.g. `wolfssl.com/docs/security-...`).
+  Do not use it for NVD — use `nvd_fetch`.
 - `think` — scratchpad.
 - `emit_verdict` — finish tool.
 </tools>
