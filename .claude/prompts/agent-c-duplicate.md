@@ -21,10 +21,14 @@ is already publicly known. Decide one of: `novel`, `duplicate`,
 </inputs>
 
 <tools>
-- `WebFetch` — scoped to:
-  - `services.nvd.nist.gov` (NVD REST API)
+- `nvd_fetch` — **PREFER THIS for any URL on `services.nvd.nist.gov`.**
+  Read-through cache + rate limiter; identical input/output to WebFetch
+  but instant on cache hits and respectful of NVD's 5-req/30-s limit
+  on misses. Refuses non-NVD URLs.
+- `WebFetch` — for non-NVD hosts only:
   - `api.github.com` (GitHub Security Advisories)
   - `wolfssl.com/docs/security-vulnerabilities/`
+  Do not use WebFetch for NVD — use `nvd_fetch` instead.
 - `Read`, `Grep` — to consult local advisory caches if present.
 - `think` — scratchpad.
 - `emit_verdict` — finish tool.

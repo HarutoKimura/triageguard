@@ -63,3 +63,6 @@ HACKATHON_RULES.md
 # tree is tracked; only local-only files are excluded.
 .claude/settings.local.json
 .claude/*.local.json
+
+# NVD response cache (populated on first use by orchestrator/nvd_client.py)
+orchestrator/_cache/
