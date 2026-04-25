@@ -113,7 +113,7 @@ export function LiveReplay({ bundle }: { bundle: RunBundle }) {
             onClick={() => start(1)}
             className="rounded-md border border-[var(--color-accent)] bg-[color:color-mix(in_oklab,var(--color-accent)_15%,transparent)] px-4 py-2 text-sm font-medium text-[var(--color-ink)] hover:bg-[color:color-mix(in_oklab,var(--color-accent)_25%,transparent)] transition-colors"
           >
-            {started && !finished ? "Restart replay" : started ? "Replay again" : "▶ Run triage"}
+            {started && !finished ? "Restart" : started ? "Replay again" : "▶ Replay this triage"}
           </button>
           <button
             type="button"
