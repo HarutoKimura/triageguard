@@ -126,32 +126,6 @@ body {
   animation: tg-stamp 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
-/* Fabrication strikethrough — a red pen drawn across a fabricated reference. */
-@keyframes tg-strikethrough {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-.tg-strike {
-  position: relative;
-  display: inline-block;
-}
-.tg-strike::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 52%;
-  height: 2px;
-  background: var(--color-slop);
-  box-shadow: 0 0 6px color-mix(in oklab, var(--color-slop) 60%, transparent);
-  animation: tg-strikethrough 0.45s ease-out 0.15s forwards;
-  width: 0;
-}
-
 /* CRT scanline texture for sanitizer panels. */
 .tg-crt {
   background-color: var(--color-terminal);

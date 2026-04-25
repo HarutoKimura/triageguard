@@ -1,35 +1,28 @@
 import type { SignalLabel } from "@/lib/types";
 
-const STYLE: Record<SignalLabel, { bg: string; fg: string; border: string }> = {
-  SIGNAL: {
-    bg: "bg-[color:color-mix(in_oklab,var(--color-signal)_15%,transparent)]",
-    fg: "text-[var(--color-signal)]",
-    border: "border-[color:color-mix(in_oklab,var(--color-signal)_50%,transparent)]",
-  },
-  SLOP: {
-    bg: "bg-[color:color-mix(in_oklab,var(--color-slop)_15%,transparent)]",
-    fg: "text-[var(--color-slop)]",
-    border: "border-[color:color-mix(in_oklab,var(--color-slop)_50%,transparent)]",
-  },
-  UNCERTAIN: {
-    bg: "bg-[color:color-mix(in_oklab,var(--color-uncertain)_15%,transparent)]",
-    fg: "text-[var(--color-uncertain)]",
-    border: "border-[color:color-mix(in_oklab,var(--color-uncertain)_50%,transparent)]",
-  },
-  ERRORED: {
-    bg: "bg-[var(--color-panel-2)]",
-    fg: "text-[var(--color-ink-dim)]",
-    border: "border-[var(--color-border)]",
-  },
+const VERDICT_COLOR: Record<SignalLabel, string> = {
+  SIGNAL: "var(--color-signal)",
+  SLOP: "var(--color-slop)",
+  UNCERTAIN: "var(--color-uncertain)",
+  ERRORED: "var(--color-ink-dim)",
 };
 
-const STAMP_GLYPH: Record<SignalLabel, string> = {
+const VERDICT_GLYPH: Record<SignalLabel, string> = {
   SIGNAL: "✓",
   SLOP: "✕",
   UNCERTAIN: "?",
   ERRORED: "!",
 };
 
+/**
+ * ScorePill — the inline verdict mark used in lists and card corners.
+ *
+ * Deliberately NOT a pill. AI scaffolding defaults to rounded-full with a
+ * tinted bg and same-color border (the Linear / shadcn / every-template
+ * shape). We reject that. This is a "forensic mark": a vertical color rule,
+ * a glyph, a small-caps label, and a bold score. No background. No border.
+ * No rounding. The verdict is carried by typography and one accent stripe.
+ */
 export function ScorePill({
   label,
   score,
@@ -39,28 +32,91 @@ export function ScorePill({
   score: number;
   size?: "sm" | "md" | "lg";
 }) {
-  const s = STYLE[label];
+  const color = VERDICT_COLOR[label];
+  const glyph = VERDICT_GLYPH[label];
+
   const dims =
     size === "lg"
-      ? "px-4 py-2 text-base"
+      ? {
+          rule: "border-l-[3px]",
+          pad: "pl-3 py-1",
+          glyph: "text-lg",
+          label: "text-xs tracking-[0.22em]",
+          score: "text-3xl",
+        }
       : size === "sm"
-        ? "px-2 py-0.5 text-[11px]"
-        : "px-3 py-1 text-xs";
+        ? {
+            rule: "border-l-2",
+            pad: "pl-2 py-0.5",
+            glyph: "text-[11px]",
+            label: "text-[9px] tracking-[0.2em]",
+            score: "text-sm",
+          }
+        : {
+            rule: "border-l-2",
+            pad: "pl-2.5 py-1",
+            glyph: "text-sm",
+            label: "text-[10px] tracking-[0.22em]",
+            score: "text-xl",
+          };
+
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border font-mono tracking-wide ${s.bg} ${s.fg} ${s.border} ${dims}`}
+      className={`inline-flex items-baseline gap-2 font-mono uppercase ${dims.rule} ${dims.pad}`}
+      style={{ borderLeftColor: color, color }}
     >
-      <span>{label}</span>
-      <span className="opacity-80">{score}</span>
+      <span aria-hidden className={`${dims.glyph} leading-none`}>
+        {glyph}
+      </span>
+      <span className={`${dims.label} font-medium leading-none`}>{label}</span>
+      <span className={`${dims.score} font-bold leading-none tracking-tight`}>
+        {score}
+      </span>
     </span>
   );
 }
 
 /**
- * Verdict stamp — the hero element on the run page.
- * Renders like a rubber stamp pressed onto a document, with the score as the
- * primary glyph. Used in SignalCard at size="lg".
+ * VerdictStamp — hero element on the run page. Renders as a rubber stamp
+ * pressed onto a document, with the score as the primary glyph. See
+ * SignalCard for usage at hero size.
  */
+const STAMP_GLYPH: Record<SignalLabel, string> = {
+  SIGNAL: "✓",
+  SLOP: "✕",
+  UNCERTAIN: "?",
+  ERRORED: "!",
+};
+
+const STAMP_STYLE: Record<
+  SignalLabel,
+  { bg: string; fg: string; border: string }
+> = {
+  SIGNAL: {
+    bg: "bg-[color:color-mix(in_oklab,var(--color-signal)_15%,transparent)]",
+    fg: "text-[var(--color-signal)]",
+    border:
+      "border-[color:color-mix(in_oklab,var(--color-signal)_50%,transparent)]",
+  },
+  SLOP: {
+    bg: "bg-[color:color-mix(in_oklab,var(--color-slop)_15%,transparent)]",
+    fg: "text-[var(--color-slop)]",
+    border:
+      "border-[color:color-mix(in_oklab,var(--color-slop)_50%,transparent)]",
+  },
+  UNCERTAIN: {
+    bg: "bg-[color:color-mix(in_oklab,var(--color-uncertain)_15%,transparent)]",
+    fg: "text-[var(--color-uncertain)]",
+    border:
+      "border-[color:color-mix(in_oklab,var(--color-uncertain)_50%,transparent)]",
+  },
+  ERRORED: {
+    bg: "bg-[var(--color-panel-2)]",
+    fg: "text-[var(--color-ink-dim)]",
+    border: "border-[var(--color-border)]",
+  },
+};
+
 export function VerdictStamp({
   label,
   score,
@@ -70,7 +126,7 @@ export function VerdictStamp({
   score: number;
   rule?: number | string;
 }) {
-  const s = STYLE[label];
+  const s = STAMP_STYLE[label];
   const glyph = STAMP_GLYPH[label];
   return (
     <div

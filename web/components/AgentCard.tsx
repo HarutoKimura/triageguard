@@ -251,12 +251,7 @@ function HallucinationBody({ d }: { d: HallucinationArtifact }) {
               <div className="font-mono text-[10px] text-[var(--color-slop)]">
                 <span className="text-[var(--color-ink-faint)]">{r.kind}</span>
                 <span className="mx-1">·</span>
-                <span
-                  className="tg-strike"
-                  style={{ animationDelay: `${0.15 + i * 0.18}s` }}
-                >
-                  {r.value}
-                </span>
+                <span>{r.value}</span>
               </div>
               {r.note && (
                 <div className="mt-0.5 text-[10px] leading-snug text-[var(--color-ink-dim)] line-clamp-2">
