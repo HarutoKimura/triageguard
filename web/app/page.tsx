@@ -9,51 +9,54 @@ export default async function Home() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      <header className="mb-10">
+      <header className="mb-10 border-b border-[var(--color-border)] pb-6">
         <div className="flex items-baseline gap-3">
-          <h1 className="text-3xl font-semibold tracking-tight">TriageGuard</h1>
-          <span className="text-[var(--color-ink-dim)] text-sm">
-            Signal vs. Slop, with receipts
+          <h1 className="font-mono text-3xl font-semibold tracking-tight text-[var(--color-ink)]">
+            TriageGuard
+          </h1>
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent)]">
+            Signal vs. Slop · with receipts
           </span>
         </div>
-        <p className="mt-2 text-[var(--color-ink-dim)] max-w-2xl">
-          An autonomous validator for vulnerability reports. Four parallel sub-agents
-          check reproducibility, root cause, duplicates, and hallucinated citations,
-          then a deterministic synthesizer emits a signal score.
+        <p className="mt-3 max-w-2xl text-[var(--color-ink-dim)]">
+          Autonomous validator for vulnerability reports. Four parallel Claude
+          Opus 4.7 sub-agents check reproducibility, root cause, duplicates,
+          and hallucinated citations. A deterministic synthesizer emits a
+          signal score with a cited reasoning dossier.
         </p>
       </header>
 
       <section>
         <div className="mb-4 flex items-baseline justify-between">
-          <h2 className="text-xs uppercase tracking-widest text-[var(--color-ink-dim)]">
-            Verified runs
+          <h2 className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-ink-dim)]">
+            Case files · verified runs
           </h2>
-          <span className="text-xs text-[var(--color-ink-faint)]">
-            {runs.length} sample{runs.length === 1 ? "" : "s"}
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[var(--color-ink-faint)]">
+            {runs.length} on file
           </span>
         </div>
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-4 md:grid-cols-2">
           {runs.map((r) => (
             <li key={r.report_id}>
               <Link
                 href={{ pathname: `/run/${r.report_id}` }}
-                className="block rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-5 hover:border-[var(--color-accent)] transition-colors"
+                className="group block rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] p-5 transition-colors hover:border-[var(--color-accent)]"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
-                      {r.sample_id}
+                    <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-ink-faint)]">
+                      file · {r.sample_id}
                     </div>
-                    <div className="mt-1 text-lg font-medium">
+                    <div className="mt-1 font-mono text-lg text-[var(--color-ink)]">
                       {r.vendor}/{r.product}
                     </div>
-                    <div className="text-sm text-[var(--color-ink-dim)]">
+                    <div className="mt-0.5 text-sm text-[var(--color-ink-dim)]">
                       {r.bug_class ?? "—"}
                     </div>
                   </div>
                   <ScorePill label={r.label} score={r.score} />
                 </div>
-                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[var(--color-ink-faint)]">
+                <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t border-dashed border-[var(--color-border)] pt-3 font-mono text-[11px] text-[var(--color-ink-faint)]">
                   <span>rule {r.triggering_rule}</span>
                   <span>{r.recommendation.toLowerCase()}</span>
                   {r.total_runtime_sec != null && (
@@ -62,6 +65,9 @@ export default async function Home() {
                   {r.total_cost_usd != null && (
                     <span>${r.total_cost_usd.toFixed(2)}</span>
                   )}
+                  <span className="ml-auto text-[var(--color-accent)] opacity-0 transition-opacity group-hover:opacity-100">
+                    open case →
+                  </span>
                 </div>
               </Link>
             </li>
@@ -70,7 +76,7 @@ export default async function Home() {
         {runs.length === 0 && (
           <p className="text-[var(--color-ink-dim)]">
             No findings/ runs yet. Run{" "}
-            <code className="text-[var(--color-ink)]">
+            <code className="font-mono text-[var(--color-ink)]">
               .venv/bin/python -m orchestrator demo-inputs/s1-cve-2026-3849/
             </code>{" "}
             first.

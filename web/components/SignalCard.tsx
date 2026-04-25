@@ -1,5 +1,5 @@
 import type { SignalScoreArtifact } from "@/lib/types";
-import { ScorePill } from "./ScorePill";
+import { VerdictStamp } from "./ScorePill";
 
 type AgentState = "idle" | "running" | "done";
 
@@ -29,37 +29,37 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
 
   return (
     <div className="tg-fade-in rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <ScorePill label={signal.label} score={signal.score} size="lg" />
+      <div className="flex flex-wrap items-start justify-between gap-6">
+        <div className="flex items-center gap-5">
+          <VerdictStamp
+            label={signal.label}
+            score={signal.score}
+            rule={signal.triggering_rule}
+          />
           <div>
-            <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-ink-faint)]">
               recommendation
             </div>
-            <div className="font-mono text-lg">{signal.recommendation}</div>
-          </div>
-        </div>
-        <div className="flex items-start gap-6">
-          {signal.ensemble_confidence != null && (
-            <ConfidenceMeter value={signal.ensemble_confidence} />
-          )}
-          <div className="text-right">
-            <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
-              triggering rule
+            <div className="font-mono text-base text-[var(--color-ink)]">
+              {signal.recommendation}
             </div>
-            <div className="font-mono text-lg">{signal.triggering_rule}</div>
           </div>
         </div>
+        {signal.ensemble_confidence != null && (
+          <ConfidenceMeter value={signal.ensemble_confidence} />
+        )}
       </div>
 
-      <p className="mt-4 text-[var(--color-ink)]">{signal.reason}</p>
+      <p className="mt-5 text-[var(--color-ink)]">{signal.reason}</p>
 
       {signal.narrative && <Narrative text={signal.narrative} />}
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-dim)] sm:grid-cols-4">
+      <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-2 border-t border-[var(--color-border)] pt-4 text-xs text-[var(--color-ink-dim)] sm:grid-cols-4">
         {Object.entries(verdicts).map(([k, v]) => (
           <div key={k}>
-            <dt className="font-mono text-[var(--color-ink-faint)]">{k}</dt>
+            <dt className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--color-ink-faint)]">
+              {k}
+            </dt>
             <dd className="font-mono text-[var(--color-ink)]">{String(v)}</dd>
           </div>
         ))}
@@ -68,57 +68,68 @@ export function SignalCard({ state, signal, allAgentsDone }: Props) {
   );
 }
 
+/**
+ * ASCII-bar confidence meter. Replaces the SVG bar that every "agent
+ * dashboard" submission uses. Reads as monospace progress, like a build log.
+ */
 function ConfidenceMeter({ value }: { value: number }) {
   const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
-  const barColor =
+  const cells = 20;
+  const filled = Math.round((pct / 100) * cells);
+  const bar = "█".repeat(filled) + "░".repeat(cells - filled);
+  const color =
     pct >= 85
       ? "var(--color-signal)"
       : pct >= 60
         ? "var(--color-uncertain)"
         : "var(--color-slop)";
   return (
-    <div className="min-w-28">
-      <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)] text-right">
+    <div className="text-right">
+      <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-ink-faint)]">
         confidence
       </div>
-      <div className="mt-0.5 flex items-baseline justify-end gap-1">
-        <span className="font-mono text-lg">{pct}%</span>
-      </div>
       <div
-        className="mt-1 h-1.5 w-28 rounded-full bg-[var(--color-panel-2)] overflow-hidden"
-        role="meter"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={pct}
+        className="mt-1 font-mono text-[15px] leading-none"
+        style={{ color }}
+        aria-label={`confidence ${pct} percent`}
       >
-        <div
-          className="h-full transition-[width] duration-500"
-          style={{ width: `${pct}%`, background: barColor }}
-        />
+        {bar}
       </div>
-      <div className="mt-1 text-right text-[10px] text-[var(--color-ink-faint)] font-mono">
-        geo-mean ×4
+      <div className="mt-1 font-mono text-xs text-[var(--color-ink-dim)]">
+        {pct}% · geo-mean ×4
       </div>
     </div>
   );
 }
 
+/**
+ * Narrative panel — rendered as a cream "paper" sheet resting on the
+ * warm-black canvas, with serif body text. The hero artifact: the maintainer
+ * reads a short written report, not a chat output.
+ */
 function Narrative({ text }: { text: string }) {
   const paragraphs = text
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
   return (
-    <section className="mt-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel-2)] p-4">
-      <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-widest text-[var(--color-ink-faint)]">
-        <span>Opus 4.7 reasoning</span>
-        <span className="font-mono text-[var(--color-ink-dim)] normal-case tracking-normal">
-          xhigh · adaptive thinking
-        </span>
-      </div>
-      <div className="space-y-3 text-[13px] leading-relaxed text-[var(--color-ink)]">
+    <section className="mt-6 tg-paper rounded-md p-6">
+      <header className="mb-3 flex items-baseline justify-between border-b border-[var(--color-paper-edge)] pb-2">
+        <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-ink-deep)]">
+          Reproducibility dossier
+        </div>
+        <div className="font-mono text-[10px] tracking-[0.15em] text-[var(--color-paper-rule)]">
+          Opus 4.7 · xhigh · adaptive thinking
+        </div>
+      </header>
+      <div className="space-y-3 text-[15px] leading-relaxed text-[var(--color-ink-deep)]">
         {paragraphs.map((p, i) => (
-          <p key={i}>{p}</p>
+          <p
+            key={i}
+            className={i === 0 ? "first-letter:font-serif first-letter:text-3xl first-letter:font-bold first-letter:mr-1 first-letter:float-left first-letter:leading-[0.9]" : ""}
+          >
+            {p}
+          </p>
         ))}
       </div>
     </section>

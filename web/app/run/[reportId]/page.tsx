@@ -24,12 +24,12 @@ export default async function RunPage({
         </Link>
       </nav>
 
-      <header className="mb-8 rounded-xl border border-[var(--color-border)] bg-[var(--color-panel)] p-6">
+      <header className="mb-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-panel)] p-6">
         <div className="flex flex-wrap items-baseline gap-x-6 gap-y-1">
-          <div className="text-xs uppercase tracking-widest text-[var(--color-ink-faint)]">
-            {m.sample_id}
+          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-accent)]">
+            case file · {m.sample_id}
           </div>
-          <div className="text-lg font-medium">
+          <div className="font-mono text-lg text-[var(--color-ink)]">
             {m.target.vendor}/{m.target.product}
           </div>
           {m.target.claimed_tag && (
@@ -38,12 +38,12 @@ export default async function RunPage({
             </div>
           )}
           {m.target.claimed_cve && (
-            <div className="font-mono text-xs text-[var(--color-ink-dim)]">
+            <div className="font-mono text-xs text-[var(--color-uncertain)]">
               {m.target.claimed_cve}
             </div>
           )}
         </div>
-        <div className="mt-2 text-sm text-[var(--color-ink-dim)]">
+        <div className="mt-2 font-mono text-[11px] text-[var(--color-ink-dim)]">
           {m.bug_class ?? "—"} · submitted {new Date(m.submitted_at).toISOString().slice(0, 10)}{" "}
           · submitter {m.submitter}
         </div>
