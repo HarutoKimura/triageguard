@@ -23,6 +23,13 @@ const STYLE: Record<SignalLabel, { bg: string; fg: string; border: string }> = {
   },
 };
 
+const STAMP_GLYPH: Record<SignalLabel, string> = {
+  SIGNAL: "✓",
+  SLOP: "✕",
+  UNCERTAIN: "?",
+  ERRORED: "!",
+};
+
 export function ScorePill({
   label,
   score,
@@ -41,10 +48,51 @@ export function ScorePill({
         : "px-3 py-1 text-xs";
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full border font-medium tracking-wide ${s.bg} ${s.fg} ${s.border} ${dims}`}
+      className={`inline-flex items-center gap-2 rounded-full border font-mono tracking-wide ${s.bg} ${s.fg} ${s.border} ${dims}`}
     >
-      <span className="font-mono">{label}</span>
+      <span>{label}</span>
       <span className="opacity-80">{score}</span>
     </span>
+  );
+}
+
+/**
+ * Verdict stamp — the hero element on the run page.
+ * Renders like a rubber stamp pressed onto a document, with the score as the
+ * primary glyph. Used in SignalCard at size="lg".
+ */
+export function VerdictStamp({
+  label,
+  score,
+  rule,
+}: {
+  label: SignalLabel;
+  score: number;
+  rule?: number | string;
+}) {
+  const s = STYLE[label];
+  const glyph = STAMP_GLYPH[label];
+  return (
+    <div
+      className={`tg-stamp inline-flex flex-col items-center justify-center gap-0.5 rounded-md border-2 px-5 py-3 font-mono uppercase ${s.bg} ${s.fg} ${s.border}`}
+      style={{
+        letterSpacing: "0.18em",
+        boxShadow:
+          "inset 0 0 0 1px color-mix(in oklab, currentColor 30%, transparent)",
+      }}
+    >
+      <div className="flex items-center gap-2 text-xs">
+        <span aria-hidden>{glyph}</span>
+        <span>{label}</span>
+      </div>
+      <div className="text-3xl font-bold leading-none tracking-tight">
+        {score}
+      </div>
+      {rule != null && (
+        <div className="text-[9px] tracking-[0.25em] opacity-70">
+          rule {rule}
+        </div>
+      )}
+    </div>
   );
 }

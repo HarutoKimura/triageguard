@@ -160,12 +160,21 @@ function ReproBody({ a }: { a: ReproArtifact }) {
         </div>
       )}
       {frames.length > 0 && (
-        <div className="rounded-md border border-[var(--color-border)] bg-[var(--color-panel-2)] p-2 font-mono text-[10px] leading-4 text-[var(--color-ink-dim)]">
-          {frames.map((f, i) => (
-            <div key={i} className="truncate">
-              {f}
-            </div>
-          ))}
+        <div className="tg-crt rounded-md border border-[var(--color-border-strong)] p-2 font-mono text-[10px] leading-4">
+          {frames.map((f, i) => {
+            const isError = /error|overflow|invalid|crash/i.test(f);
+            const isAddr = /0x[0-9a-f]+/i.test(f);
+            const color = isError
+              ? "var(--color-terminal-red)"
+              : isAddr
+                ? "var(--color-terminal-amber)"
+                : "var(--color-terminal-green)";
+            return (
+              <div key={i} className="truncate" style={{ color }}>
+                {f}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -240,7 +249,14 @@ function HallucinationBody({ d }: { d: HallucinationArtifact }) {
               className="rounded-md border border-[color:color-mix(in_oklab,var(--color-slop)_35%,transparent)] bg-[color:color-mix(in_oklab,var(--color-slop)_10%,transparent)] p-2"
             >
               <div className="font-mono text-[10px] text-[var(--color-slop)]">
-                {r.kind} · {r.value}
+                <span className="text-[var(--color-ink-faint)]">{r.kind}</span>
+                <span className="mx-1">·</span>
+                <span
+                  className="tg-strike"
+                  style={{ animationDelay: `${0.15 + i * 0.18}s` }}
+                >
+                  {r.value}
+                </span>
               </div>
               {r.note && (
                 <div className="mt-0.5 text-[10px] leading-snug text-[var(--color-ink-dim)] line-clamp-2">
