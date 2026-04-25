@@ -66,3 +66,5 @@ HACKATHON_RULES.md
 
 # NVD response cache (populated on first use by orchestrator/nvd_client.py)
 orchestrator/_cache/
+
+demo/
