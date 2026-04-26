@@ -91,8 +91,8 @@ Dockerfile.wolfssl    Sandboxed wolfSSL build for Agent A
 cp .env.example .env  # fill ANTHROPIC_API_KEY
 chmod 600 .env
 
-# 2. Python deps.
-uv sync  # or: pip install -e ".[dev]"
+# 2. Python deps (3.12+). Dev extras include pytest + ruff + mypy.
+uv sync --extra dev  # or: pip install -e ".[dev]"
 
 # 3. Prove the rubric works (no API calls).
 pytest tests/
