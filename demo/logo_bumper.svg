@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" width="100%" height="100%">
+  <title>TriageGuard — video bumper</title>
+  <style>
+    .bg     { fill: #0a0a0a; }
+    .name   { fill: #ece4cb; }
+    .accent { fill: #e0b945; }
+    .mono   { font-family: "Cascadia Code", "JetBrains Mono", ui-monospace, "Courier New", monospace; }
+
+    @keyframes riseIn {
+      0%   { transform: translateY(110px); opacity: 0; }
+      100% { transform: translateY(0);     opacity: 1; }
+    }
+    @keyframes riseInDelayed {
+      0%, 35% { transform: translateY(110px); opacity: 0; }
+      100%    { transform: translateY(0);     opacity: 1; }
+    }
+
+    #title    { transform-box: fill-box; animation: riseIn        2.4s cubic-bezier(.22,1,.36,1) both; }
+    #tagline  { transform-box: fill-box; animation: riseInDelayed 3.1s cubic-bezier(.22,1,.36,1) both; }
+  </style>
+
+  <rect class="bg" width="1920" height="1080"/>
+
+  <g transform="translate(960, 560)">
+    <text id="title" x="0" y="0" class="mono name" font-size="160" font-weight="700" text-anchor="middle" dominant-baseline="alphabetic">TriageGuard</text>
+    <text id="tagline" x="0" y="70" class="mono accent" font-size="36" font-weight="700" letter-spacing="8" text-anchor="middle" dominant-baseline="hanging">SIGNAL VS. SLOP · WITH RECEIPTS</text>
+  </g>
+</svg>
