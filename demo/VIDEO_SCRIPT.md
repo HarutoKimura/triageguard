@@ -176,45 +176,144 @@ note.
 
 ---
 
-## Pod 3 — "I am part of the problem" (0:40–1:00)
+## Pod 3 — "I am part of the problem" (0:55–1:15)
 
-**Main point:** Vulnerability moment — *I caused some of this.* The
-emotional spine of the video. Read slowly.
+**Main point:** Direct continuation from Pod 2's "submissions
+surging" — *and I sent some of that noise.* Three redacted triager
+replies flash by as a single visual proof block (no company names,
+no triager handle visible — all blacked out). Land the personal
+admission, then **pivot into TriageGuard**: "I am part of the
+problem. So I built TriageGuard." Sets up Pod 4's product reveal.
 
-**Voice-over (≈50 words):**
-> "Maintainers I have reported to have written back to me — 'Please
-> verify your PoC yourself before submitting.' Programs delisting.
-> Triage queues stretching to three months. I will be honest: a
-> hundred reports in two months means I sent some of that noise.
-> I am part of the problem I am trying to solve."
+**Visual timeline (already cut on the editor):**
 
-**On-screen:**
-- An anonymized real maintainer email with the line **"Please verify
-  your PoC yourself before submitting"** highlighted.
-- B-roll: a rejected report screen of his own.
+| Time | Clip | Source / Purpose |
+|---|---|---|
+| 0:55–1:00 | Face / B-roll (rejected report screen) | "And I sent some of them" — personal admission lead-in |
+| 1:00–1:09 | `screenshots/pod1-credentials/commanderstrax-redacted.png` → `commanderstrax2-redacted.png` → `commanderstrax3-redacted.png` (3 quick flashes, ~3 s each) | Three real redacted triager replies to my own reports. Triager handle and product names blacked out. Visible quoted phrases: "actually try the PoC on a new machine" / "closed this submission as informative" / "self-inflicted scenario rather than a genuine security vulnerability" |
+| 1:09–1:15 | Face / B-roll (rejected report screen) | Landing + pivot — "I am part of the problem. So I built TriageGuard." |
 
-**Transition:** A breath. Cut to product UI.
+**Voice-over (≈55 words, ~3 words/sec, slow delivery on the landing — *carry the surge from Pod 2 → admit complicity → pivot into product*):**
+
+**A · 0:55–1:09 (face → 3 redacted screenshots flash) — admission + proof:**
+> "In fact, I sent some of them — and they were not high-quality
+> reports. The triagers wrote back: *try the PoC on a new machine.*
+> *Closed as informative.* *A self-inflicted scenario, not a
+> vulnerability.*"
+
+**B · 1:09–1:15 (face / B-roll) — landing + pivot to Pod 4:**
+> "I am part of the problem I am trying to solve. Therefore, I built
+> TriageGuard."
+
+**On-screen overlays:**
+- During the 3 screenshot flashes (1:00–1:09), highlight only the
+  one phrase per screenshot that the VO is currently quoting — they
+  are pre-redacted (`-redacted.png`) so triager handle and product
+  names are already blacked out. Do NOT add product names back via
+  caption.
+- During segment B, no overlay — let "I am part of the problem"
+  land in silence, then "So I built TriageGuard" leads visually
+  into Pod 4's home page.
+
+**Transition:** Direct hand-off into Pod 4 — the word "TriageGuard"
+is the cue for the product home page to appear. No black frame, no
+breath; the spoken name and the visual reveal hit on the same beat.
+
+**Timing note:** Pod 3 is now back to **~20 seconds** (was 29 s in
+the prior 4-segment version). Combined with Pod 1 (+10 s) and Pod 2
+(+5 s), net video runtime is **~3:15** — Pod 3 no longer absorbs
+overrun. Three screenshots flash as a single visual block (~3 s
+each) rather than getting their own segments, per "時間もあまりない"
+direction.
+
+**Fact-check note:**
+- Use the **redacted** versions in
+  `demo/screenshots/pod1-credentials/`:
+  `commanderstrax-redacted.png`, `commanderstrax2-redacted.png`,
+  `commanderstrax3-redacted.png`. The originals at the repo-root
+  level still contain product names and the triager handle.
+- Do NOT name the affected products in VO. The screenshots are
+  redacted to remove company identifiers — the VO must stay
+  consistent. The point is the *pattern of noisy reports*, not the
+  target.
+- Quoted phrases in VO ("try the PoC on a new machine", "closed as
+  informative", "self-inflicted scenario, not a vulnerability") are
+  taken verbatim from the redacted screenshots — verify before
+  recording that the on-screen highlights match the spoken phrasing.
 
 ---
 
-## Pod 4 — The Product (1:00–1:20)
+## Pod 4 — The Product (1:15–1:40)
 
-**Main point:** TriageGuard one-liner + four-agent shape.
+**Main point:** Walk the architecture diagram beat-by-beat. This
+pod earns the **Opus 4.7 Use (20%)** judging category — name the
+model split (Haiku for glue · Opus 4.7 for sub-agents and
+synthesizer), the fan-out / fan-in pattern, file-based handoff (no
+agent judges another), and the deterministic synthesizer. The
+diagram does the heavy lifting; VO narrates the circuit lighting up.
 
-**Voice-over (≈50 words):**
-> "This is TriageGuard. You drop in a vulnerability report. Four
-> Claude Opus 4.7 sub-agents fan out in parallel — one rebuilds the
-> proof-of-concept, one verifies the cited source, one queries CVE
-> databases, one fact-checks every reference. Sixty seconds later:
-> SIGNAL or SLOP, with receipts."
+**Visual timeline (use `demo/architecture.excalidraw` — single full-frame asset, animated reveal):**
 
-**On-screen:**
-- TriageGuard home page: list of samples.
-- Quick 4-lane diagram overlay: **Reproducibility · Root Cause ·
-  Duplicate · Hallucination.**
-- Logo bar: wolfSSL, NSS, PowerDNS.
+| Time | Highlighted region of diagram | VO segment |
+|---|---|---|
+| 1:15–1:20 | Title card → **INPUT** box (Report + PoC + claimed code) lights up | A — name + input |
+| 1:20–1:27 | **ORCHESTRATOR** (Python · Claude Agent SDK · Haiku 4.5 glue) → 4 fan-out arrows light up to the four sub-agent boxes | B — orchestrator fans out |
+| 1:27–1:34 | The 4 sub-agent boxes light in sequence (REPRODUCIBILITY · ROOT CAUSE · DUPLICATE · HALLUCINATION), then the `findings/{report_id}/` box with `repro.json` / `root_cause.json` / `duplicate.json` / `hallucination.json` appears | C — what each lane does + file-based handoff |
+| 1:34–1:40 | **SYNTHESIZER** (Opus 4.7 xhigh, weighted rubric) → **VERDICT** box (Signal Score 0–100 · SIGNAL · UNCERTAIN · SLOP) lights up | D — synthesis + verdict |
 
-**Transition:** Click on s1.
+**Voice-over (≈75 words, ~3 words/sec — *name → input → fan-out → 4 specialists + file handoff → deterministic synthesis → verdict*):**
+
+**A · 1:15–1:20 (INPUT box) — name + input:**
+> "This is TriageGuard. First, you drop in a vulnerability report, the
+> proof-of-concept, and the claimed source code."
+
+**B · 1:20–1:27 (ORCHESTRATOR + fan-out) — fan-out:**
+> "A Python orchestrator — Claude Haiku 4.5 for the glue — fans out
+> to four Claude Opus 4.7 sub-agents, running in parallel."
+
+**C · 1:27–1:34 (4 sub-agents → `findings/{report_id}/`) — specialists + file-based handoff:**
+> "They rebuild the PoC, read the source, check for duplicates,
+> fact-check every reference. Each writes its findings as JSON.
+> No agent judges another."
+
+**D · 1:34–1:40 (SYNTHESIZER → VERDICT) — deterministic synthesis:**
+> "A synthesizer applies a weighted rubric. Signal Score, zero to
+> one hundred. SIGNAL, UNCERTAIN, or SLOP."
+
+**On-screen overlays:**
+- Hold the diagram title-bar caption visible throughout: **"TriageGuard · Signal vs. Slop verdict for vulnerability reports."**
+- During segment B, a small chyron under the orchestrator: **"Haiku 4.5 · glue · routing"**
+- During segment B/C transition, a small chyron under each sub-agent box as it lights: **"Opus 4.7 · xhigh effort"**
+- During segment D, the `VERDICT` box's three labels (SIGNAL · UNCERTAIN · SLOP) flash in sequence as they are spoken — green / amber / red.
+- Optional: a faint corner caption **"fan-out · file-based handoff · fan-in"** for the entire pod.
+
+**Transition:** Cursor moves to the home page sample list and clicks
+**s1** — hard cut into Pod 5.
+
+**Timing note:** This pod is **25 seconds** (was 20 s, +5 s). The
+architecture walkthrough is the *Opus-4.7-Use* judging anchor —
+recommend keeping the full 25 s rather than compressing. Combined
+with Pod 1 (+10 s), Pod 2 (+5 s), Pod 3 (±0), net video runtime is
+**~3:20** — Pod 5 onward shift by +20 s from their original cues.
+Absorb in Pod 8 (drop to ~15 s by trimming the Opus-trait list to
+two items, since Pod 4 already established Haiku/Opus split).
+
+**Fact-check note:**
+- Architecture diagram source: `demo/architecture.excalidraw`. Text
+  labels match VO verbatim — verify before recording that nothing has
+  drifted (e.g. "Reproducibility" vs "Repro", "Root Cause" vs
+  "Root-Cause").
+- "Haiku 4.5 for the glue" — confirmed in `CLAUDE.md` ("Opus 4.7 at
+  xhigh for sub-agents + synthesizer; Haiku 4.5 for glue. This split
+  is mentioned in the pitch.")
+- "No agent judges another" — this is the file-based-handoff design
+  point: agents write to `findings/{report_id}/*.json`, the
+  synthesizer reads JSON. No agent reads another agent's reasoning
+  trace; the synthesizer applies a *deterministic* Python rubric, not
+  an LLM judgment. This is the core defensibility claim — do not
+  soften the wording.
+- "Signal Score 0–100, SIGNAL/UNCERTAIN/SLOP" — confirmed against
+  `.claude/skills/signal-score-rubric/SKILL.md`.
 
 ---
 
@@ -346,8 +445,8 @@ should ring after the screen goes black.
 |---|---|---|
 | 1 | "nine real CVEs", "two months", "over sixty-five thousand dollars", "Intigriti, Mozilla, YesWeHack" | personal record |
 | 2 | "five hundred high-severity zero-days", "Claude Mythos", "too capable in cyber to release publicly", "twelve-partner coalition", "two-hundred-and-ten-percent year-over-year spike", "all-time high", "forty-six thousand vulnerability submissions" | Anthropic Red (Feb 2026) / Glasswing / HackerOne 9th annual report (Oct 2025) → HackerOne h1 Validation (Apr 2026) |
-| 3 | "a hundred reports in two months", "three months" (queue) | personal + maintainer feedback |
-| 4 | "four Claude Opus 4.7 sub-agents", "sixty seconds" | product spec |
+| 3 | "a hundred reports in two months", "try the PoC on a new machine" (verbatim), "closed as informative" (verbatim), "self-inflicted scenario, not a vulnerability" (verbatim), "I am part of the problem I am trying to solve", "So I built TriageGuard" | three redacted triager replies (Jan–Feb 2026 — product names blacked out per platform anonymization) |
+| 4 | "four Claude Opus 4.7 sub-agents", "Claude Haiku 4.5 for the glue", "fans out... in parallel", "writes its findings as JSON", "no agent judges another", "weighted rubric", "Signal Score, zero to one hundred", "SIGNAL, UNCERTAIN, or SLOP" | `demo/architecture.excalidraw` (single-frame walk-through) |
 | 5 | "SIGNAL ninety", "ninety-five percent" (confidence) | live s1 verdict |
 | 6 | "SLOP fifteen", "thirty minutes", "thirty seconds" | live s4 verdict |
 | 7 | "UNCERTAIN fifty", "ninety-three percent" (confidence) | live s2 verdict |
@@ -472,3 +571,50 @@ should ring after the screen goes black.
   "vulnerability submissions" (collapses to "submissions" — chart
   context disambiguates) and "March 2026 hit" → "in March alone."
   Hero number "forty-six thousand" preserved.
+- **2026-04-26** — Pod 3 rewritten 0:40–1:00 → 0:55–1:24 to match
+  the three real triager-reply screenshots (commanderstrax.png /
+  commanderstrax2.png / commanderstrax3.png, Jan–Feb 2026, Arm +
+  Intel programs). VO split into A/B/C/D segments mirroring the
+  screenshots' chronology + a closing personal beat. The arc now
+  reads: *valid-but-noisy report* (A) → *fragile PoC, doesn't
+  reproduce* (B) → *closed as informative, not a vulnerability* (C)
+  → *I am part of the problem* (D). Verbatim quotes preserved
+  ("actually try the PoC on a new machine", "self-inflicted
+  scenario", "closed as informative"). Earlier paraphrased line
+  "Please verify your PoC yourself before submitting" replaced with
+  the actual triager wording. "Programs delisting" and "triage
+  queues stretching to three months" cut — Pod 2 already establishes
+  the industry-wide spike, and Pod 3 stays 100% personal. Net
+  runtime + 9 s (Pod 3 now ≈ 29 s) → total video ≈ 3:24 without
+  later trims.
+- **2026-04-26** — Pod 3 compressed 0:55–1:24 → 0:55–1:15 (29 s →
+  20 s) and switched to the **redacted** screenshot variants in
+  `demo/screenshots/pod1-credentials/*-redacted.png`. Reasons:
+  (1) the original screenshots showed product names (Arm, Intel,
+  OpenVINO) and the triager handle — speaker requested anonymization;
+  (2) per "時間もあまりないので、1つ1つ触れてる時間はない" direction,
+  the three replies now flash as a single visual proof block (~3 s
+  each) rather than getting their own A/B/C segments. Pod 3 also now
+  *bridges into Pod 4* — closes with "So I built TriageGuard," with
+  the spoken product name landing on the same beat as the home-page
+  reveal in Pod 4. Continuity from Pod 2 sharpened: opening line
+  "And I sent some of them" picks up the surge from Pod 2D's
+  "Forty-six thousand submissions in March alone." Net runtime back
+  to ~3:15 (Pod 3 no longer absorbs overrun).
+- **2026-04-26** — Pod 4 rewritten 1:00–1:20 → 1:15–1:40 to walk
+  through the architecture diagram (`demo/architecture.excalidraw`)
+  beat-by-beat. The diagram is held on screen for the full pod with
+  progressive region-highlighting synced to VO segments A/B/C/D.
+  This pod is the **Opus 4.7 Use (20%)** judging anchor — VO now
+  explicitly names: (1) Python orchestrator + Claude Agent SDK,
+  (2) Haiku 4.5 for glue/routing, (3) four Opus 4.7 sub-agents
+  running in parallel (xhigh effort), (4) file-based handoff via
+  `findings/{report_id}/*.json`, (5) "no agent judges another"
+  defensibility claim, (6) deterministic Python synthesizer with
+  weighted rubric, (7) Signal Score 0–100 → SIGNAL/UNCERTAIN/SLOP.
+  Old "sixty seconds later: SIGNAL or SLOP, with receipts" line cut
+  — the architecture walk-through is more credibility-dense than
+  the speed claim. Net runtime + 5 s (Pod 4 now ≈ 25 s). Pod 5+
+  start cues shift +20 s from original; absorb the remaining
+  overrun in Pod 8 (target ≈ 15 s by trimming the Opus-trait list
+  to two items, since Pod 4 already established Haiku/Opus split).
