@@ -27,6 +27,14 @@ export default async function Home() {
       </header>
 
       <section>
+        <p className="mb-4 text-sm text-[var(--color-ink-dim)]">
+          Pre-computed runs from the demo set below. To triage your own
+          report, run{" "}
+          <code className="font-mono text-[var(--color-ink)]">
+            python -m orchestrator &lt;your-input-dir&gt;
+          </code>{" "}
+          — see <span className="font-mono text-[var(--color-ink)]">Run your own report</span> in the README.
+        </p>
         <div className="mb-4 flex items-baseline justify-between">
           <h2 className="font-mono text-[10px] uppercase tracking-[0.3em] text-[var(--color-ink-dim)]">
             Case files · verified runs
