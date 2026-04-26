@@ -210,10 +210,7 @@ encode every one of these rules.
 | **s5** | curl AI-slop, fabricated `Curl_verify_sni_extension` | SLOP 10–25 | ✅ live SLOP 15, rule 2, conf 92% |
 | s6 | curl AI-slop (regenerable on demand) | SLOP 10–25 | ⚠ generator works, but **no live findings on disk yet** |
 
-s7 (optional, Day-3 candidate): one of the AMD-XQTOLTBN UAF or
-AMD-1WR6ZIJJ TOCTOU reports the user has on disk — would add a "policy
-borderline" beat where TriageGuard catches technical fabrication but
-the maintainer still made a policy judgment.
+(s7 candidate dropped — out of scope for the 3-minute demo.)
 
 ---
 
@@ -326,22 +323,15 @@ has been produced live yet** — that's a Day-3 prerequisite.
 
 ### Nice-to-have (Day 3 if time permits)
 
-5. **s7 policy-borderline sample** (~$5, ~5 min)
-   - Register one of the AMD-XQTOLTBN (UAF) or AMD-1WR6ZIJJ (TOCTOU)
-     reports the user has on disk under
-     `/Users/HarutoKimura/Research/bug-hunter/intigriti/AMD/XRT/`.
-   - Adds a unique "TriageGuard catches technical fabrication; the
-     maintainer still made the policy call" beat.
-
-6. **Vercel deployment** (~30 min if the strategy is just "commit a
+5. **Vercel deployment** (~30 min if the strategy is just "commit a
    curated set of findings/ JSON"; longer if we want a real seed
    step). Worth it only if judges want a live link.
 
-7. **`/demo-dryrun`** against all 6 samples
+6. **`/demo-dryrun`** against all 6 samples
    - Sanity check that the NVD cache + sequential rehearser keep
      timing predictable.
 
-8. **Unit tests for Agents C and D plumbing**
+7. **Unit tests for Agents C and D plumbing**
    - Currently A/B/synthesizer/confidence are tested. C/D are
      plumbing-verified only.
 

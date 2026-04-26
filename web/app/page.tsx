@@ -74,13 +74,46 @@ export default async function Home() {
           ))}
         </ul>
         {runs.length === 0 && (
-          <p className="text-[var(--color-ink-dim)]">
-            No findings/ runs yet. Run{" "}
-            <code className="font-mono text-[var(--color-ink)]">
-              .venv/bin/python -m orchestrator demo-inputs/s1-cve-2026-3849/
-            </code>{" "}
-            first.
-          </p>
+          <div className="rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-panel)] p-6 text-sm text-[var(--color-ink-dim)]">
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.28em] text-[var(--color-ink-faint)]">
+              no case files yet · run a sample to populate this page
+            </p>
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>
+                <code className="font-mono text-[var(--color-ink)]">
+                  cp .env.example .env
+                </code>
+                {" — add "}
+                <code className="font-mono text-[var(--color-ink)]">
+                  ANTHROPIC_API_KEY
+                </code>
+                .
+              </li>
+              <li>
+                <code className="font-mono text-[var(--color-ink)]">uv sync</code>
+                {" (or "}
+                <code className="font-mono text-[var(--color-ink)]">
+                  pip install -e &quot;.[dev]&quot;
+                </code>
+                {")."}
+              </li>
+              <li>
+                <code className="font-mono text-[var(--color-ink)]">
+                  python -m orchestrator demo-inputs/s1-cve-2026-3849
+                </code>
+                {" — verdict lands in ~10 minutes."}
+              </li>
+            </ol>
+            <p className="mt-4">
+              Refresh this page when the run finishes; the case appears as a
+              card. To triage your own report instead of the demo set, see the
+              {" "}
+              <span className="font-mono text-[var(--color-ink)]">
+                Run your own report
+              </span>{" "}
+              section in the README.
+            </p>
+          </div>
         )}
       </section>
     </main>

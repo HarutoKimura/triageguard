@@ -67,7 +67,9 @@ HACKATHON_RULES.md
 # NVD response cache (populated on first use by orchestrator/nvd_client.py)
 orchestrator/_cache/
 
-# Demo interview transcripts — raw pre-production material with internal
-# production decisions and verbatim voice-input. Local reference only;
-# the rendered VIDEO_SCRIPT.md (sibling file) is the public artifact.
-demo/INTERVIEW_*.md
+# Demo working folder — raw pre-production material: video script
+# drafts, screenshots of private bug-bounty platforms, bumper renders,
+# logo variants, interview transcripts. The rendered demo video is
+# uploaded to YouTube/Loom for the submission; this folder is local
+# reference only.
+demo/
