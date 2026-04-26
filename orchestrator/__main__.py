@@ -51,6 +51,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="skip Agent B's git clone (offline dev / tests)",
     )
+    p.add_argument(
+        "--no-haiku",
+        action="store_true",
+        help="skip the Haiku 4.5 preflight digest (saves ~$0.001 + ~1s)",
+    )
     return p
 
 
@@ -82,6 +87,14 @@ def _print_result(res: OrchestratorResult) -> None:
     print(f"[{tag}] sample: {res.sample_id}")
     print(f"        report_id: {res.report_id}")
     print(f"        findings_dir: {res.findings_dir}")
+    if res.preflight is not None:
+        print(
+            f"        preflight (Haiku 4.5): {res.preflight.wallclock_sec:.1f}s, "
+            f"${res.preflight.cost_usd:.4f}"
+        )
+        for line in res.preflight.summary_md.splitlines():
+            if line.strip():
+                print(f"          {line}")
     print("        agents:")
     for name in ("reproducibility", "root_cause", "duplicate", "hallucination"):
         print(_fmt_agent_line(name, res.agent_results.get(name)))
@@ -110,6 +123,7 @@ async def _run(args: argparse.Namespace) -> int:
         "sample_dir": args.sample_dir,
         "dry_run": args.dry_run,
         "skip_source_clone": args.skip_source_clone,
+        "enable_haiku_preflight": not args.no_haiku,
     }
     if args.findings_root is not None:
         kwargs["findings_root"] = args.findings_root
