@@ -39,6 +39,7 @@ from orchestrator.findings import (
     make_report_id,
     prepare_findings_dir,
 )
+from orchestrator.preflight import PreflightResult, preflight_summarize
 from orchestrator.reasoning import generate_narrative
 from orchestrator.schemas import (
     DuplicateArtifact,
@@ -67,6 +68,7 @@ class OrchestratorResult:
     total_cost_usd: float = 0.0
     dry_run: bool = False
     missing_agents: list[str] = field(default_factory=list)
+    preflight: PreflightResult | None = None
 
 
 async def run_triage(
@@ -75,6 +77,7 @@ async def run_triage(
     findings_root: Path = REPO_ROOT / "findings",
     dry_run: bool = False,
     skip_source_clone: bool = False,
+    enable_haiku_preflight: bool = True,
 ) -> OrchestratorResult:
     """Fan out the sub-agents against one sample and try to synthesize."""
     sample_dir = sample_dir.resolve()
@@ -89,6 +92,17 @@ async def run_triage(
 
     # First creator — default exist_ok=False so we never collide on ids.
     findings_dir = prepare_findings_dir(findings_root, report_id)
+
+    # Haiku 4.5 preflight: cheap structured digest before the four
+    # Opus 4.7 sub-agents fan out. Fail-open — never blocks downstream.
+    preflight: PreflightResult | None = None
+    if enable_haiku_preflight:
+        preflight = await preflight_summarize(
+            sample_dir=sample_dir,
+            meta=meta,
+            findings_dir=findings_dir,
+            dry_run=dry_run,
+        )
 
     t0 = time.monotonic()
 
@@ -141,6 +155,8 @@ async def run_triage(
 
     runtime_sec = time.monotonic() - t0
     total_cost_usd = _sum_cost(agent_results)
+    if preflight is not None:
+        total_cost_usd += preflight.cost_usd
     signal_score, missing, parsed_artifacts = _try_synthesize(report_id, findings_dir)
 
     if signal_score is not None:
@@ -166,6 +182,7 @@ async def run_triage(
         total_cost_usd=total_cost_usd,
         dry_run=dry_run,
         missing_agents=missing,
+        preflight=preflight,
     )
 
 

@@ -72,12 +72,20 @@ Primary target: **wolfSSL** (C, cryptographic library, ~5 B devices).
 
 - **Opus 4.7 at `xhigh`** for the four sub-agents and the synthesizer
   narrative. This is where the reasoning happens.
-- **Haiku 4.5** for glue / routing inside the orchestrator (input
-  parsing, JSON coercion, output shaping). Fast and cheap; reserved
-  for steps that are mechanical, not judgmental.
+- **Haiku 4.5** for the orchestrator's preflight digest
+  (`orchestrator/preflight.py`): a single ~$0.0015, ~1.5 s call that
+  reads `INPUT.md` + `INPUT_meta.json` and writes a 4-bullet
+  structured summary to `findings/{report_id}/INPUT_summary.json`
+  (claimed bug class, claimed locations, claimed evidence, one-line
+  risk read). The four Opus 4.7 sub-agents re-read the raw input
+  themselves; Haiku's digest is purely a fast sanity check surfaced
+  in the CLI output and the synthesizer narrative.
 
-The split keeps cost down without giving up Opus 4.7's depth on the
-calls that actually decide the verdict.
+Fail-open by design: a Haiku error never blocks the sub-agents
+(error logged, run continues). Opt out with `--no-haiku` if you want
+to save the ~$0.0015. The split keeps cost on mechanical glue calls
+~50× lower than running Opus on the same step, without giving up
+Opus 4.7's depth on the calls that actually decide the verdict.
 
 ## Demo samples
 
