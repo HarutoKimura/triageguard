@@ -7,7 +7,7 @@ reasoning in ~12 minutes.
 **Demo video (3 min):** https://youtube.com/shorts/jqrxefYqbO4
 
 > Built for the Anthropic "Built with Opus 4.7" hackathon,
-> 2026-04-24 – 2026-04-26.
+> 2026-04-21 – 2026-04-28.
 
 ## Why
 
