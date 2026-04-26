@@ -22,30 +22,36 @@ The ecosystem bottleneck has shifted from **discovery** to
 
 ## How it works
 
-```
-Report + PoC + target repo
-         │
-         ▼
-  Orchestrator (Python + Claude Agent SDK)
-         │
-         ├──▶ Agent A — Reproducibility (Opus 4.7, xhigh)
-         ├──▶ Agent B — Root Cause       (Opus 4.7, xhigh)
-         ├──▶ Agent C — Duplicate        (Opus 4.7, xhigh)
-         └──▶ Agent D — Hallucination    (Opus 4.7, xhigh)
-         │
-         ▼
-  Synthesizer — deterministic rule engine
-         │
-         ▼
-  Signal Score 0–100  +  SIGNAL / UNCERTAIN / SLOP
-         │
-         ▼
-  Streamed to the web UI via SSE
+```mermaid
+flowchart LR
+    INPUT["INPUT<br/>Report + PoC<br/>+ claimed code"]
+    ORCH["ORCHESTRATOR<br/>Python · Claude Agent SDK<br/>fan-out · fan-in<br/><i>Haiku 4.5 — glue / routing</i>"]
+    A["REPRODUCIBILITY<br/>build · run PoC<br/>capture trace"]
+    B["ROOT CAUSE<br/>read source<br/>trace data flow"]
+    C["DUPLICATE<br/>CVE / advisories<br/>git log"]
+    D["HALLUCINATION<br/>functions / APIs<br/>line refs"]
+    FIND["findings/{report_id}/<br/>repro.json<br/>root_cause.json<br/>duplicate.json<br/>hallucination.json"]
+    SYN["SYNTHESIZER<br/>weighted rubric<br/>reasoning trace<br/><i>Opus 4.7 (xhigh)</i>"]
+    VER["VERDICT<br/>Signal Score 0–100<br/>SIGNAL · UNCERTAIN · SLOP"]
+
+    INPUT --> ORCH
+    ORCH --> A
+    ORCH --> B
+    ORCH --> C
+    ORCH --> D
+    A -.-> FIND
+    B -.-> FIND
+    C -.-> FIND
+    D -.-> FIND
+    FIND --> SYN
+    SYN --> VER
 ```
 
-Four Claude Agent SDK sub-agents run in parallel, each writing a JSON
-artifact. A deterministic rule engine (not an LLM) produces the final
-score — auditable, reproducible, cheap.
+`fan-out`: 4 sub-agents run in parallel (Opus 4.7 at `xhigh` effort).
+`shared state` via `findings/{report_id}/` JSON artifacts.
+`fan-in`: a deterministic synthesizer (not an LLM) maps the four
+verdicts to a 0–100 Signal Score — auditable, reproducible, cheap.
+The web UI streams the same artifacts via SSE.
 
 Primary target: **wolfSSL** (C, cryptographic library, ~5 B devices).
 
@@ -62,8 +68,16 @@ Primary target: **wolfSSL** (C, cryptographic library, ~5 B devices).
 - **Precise instruction following** — strict verdict schemas, closed
   enum values, zero hedging.
 
-Hybrid model split: Opus 4.7 at `xhigh` for the sub-agents and
-synthesizer; Haiku 4.5 for glue (report parsing, output shaping).
+**Hybrid model split** — visible in the architecture diagram above:
+
+- **Opus 4.7 at `xhigh`** for the four sub-agents and the synthesizer
+  narrative. This is where the reasoning happens.
+- **Haiku 4.5** for glue / routing inside the orchestrator (input
+  parsing, JSON coercion, output shaping). Fast and cheap; reserved
+  for steps that are mechanical, not judgmental.
+
+The split keeps cost down without giving up Opus 4.7's depth on the
+calls that actually decide the verdict.
 
 ## Demo samples
 
